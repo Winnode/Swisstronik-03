@@ -21,6 +21,8 @@ npm install dotenv
 npm install @swisstronik/utils
 npm install @openzeppelin/contracts
 npm install --save-dev @openzeppelin/hardhat-upgrades
+npm install @nomicfoundation/hardhat-toolbox
+npm install typescript ts-node @types/node
 echo "Installation of dependencies completed."
 
 # Create a new Hardhat project
@@ -30,11 +32,6 @@ npx hardhat init
 # Remove the default Lock.sol contract
 echo "Removing default Lock.sol contract..."
 rm -f contracts/Lock.sol
-
-# Install Hardhat toolbox
-echo "Installing Hardhat toolbox..."
-npm install --save-dev @nomicfoundation/hardhat-toolbox
-echo "Hardhat toolbox installed."
 
 # Create .env file
 echo "Creating .env file..."
@@ -122,15 +119,15 @@ async function main() {
 
   console.log('Deploying NFT...');
   const contract = await Contract.deploy();
-  await contract.deployed();  // Wait for the deployment to be mined
 
-  const contractAddress = contract.address;
+  await contract.waitForDeployment();
+  const contractAddress = await contract.getAddress();
 
   console.log('NFT deployed to:', contractAddress);
 
   const deployedAddressPath = path.join(__dirname, '..', 'utils', 'deployed-address.ts');
 
-  const fileContent = \`const deployedAddress = '\${contractAddress}';\n\nexport default deployedAddress;\n\`;
+  const fileContent = \`const deployedAddress = '\${contractAddress}'\n\nexport default deployedAddress\n\`;
 
   fs.mkdirSync(path.join(__dirname, '..', 'utils'), { recursive: true });
   fs.writeFileSync(deployedAddressPath, fileContent, { encoding: 'utf8' });
